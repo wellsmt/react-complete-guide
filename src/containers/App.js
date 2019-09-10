@@ -2,8 +2,15 @@ import React, { Component } from 'react';
 import classes from './App.css';
 import Persons from '../components/Persons/Persons';
 import Cockpit from '../components/Cockpit/Cockpit';
+import withClass from '../hoc/withClass';
+import Aux from '../hoc/Aux'
 
 class App extends Component {
+    constructor(props){
+        super(props);
+        console.log('[App.js] constructor');
+    }
+
     state = {
         persons: [
             { id: 'asfag1', name: "Max", age: 28 },
@@ -11,7 +18,31 @@ class App extends Component {
             { id: 'retnh3', name: "Stephanie", age: 26 }
         ],
         otherState: 'some other value',
-        showPersons: false
+        showPersons: false,
+        showCockpit: true,
+        changeCounter: 0
+    }
+
+    // static getDerivedStateFromProps(props, state){
+    //     console.log('[App.js] getDerivedStateFromProps', props);
+    //     return state;
+    // }
+
+    // componentWillMount() {
+    //     console.log('[App.js] componentWillMount');
+    // }
+
+    componentDidMount() {
+        console.log('[App.js] componentDidMount');
+    }
+
+    componentDidUpdate() {
+        console.log('[App.js] componentDidUpdate');    
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log('[App.js] shouldComponentUpdate');
+        return true;
     }
 
     deletePersonHandler = (personIndex) => {
@@ -40,12 +71,16 @@ class App extends Component {
         const persons = [...this.state.persons];
         persons[personIndex] = person;
 
-        this.setState({
-            persons: persons
+        this.setState((prevState, props) => {
+            return {
+                persons: persons,
+                changeCounter: prevState.changeCounter+1
+            };
         });
     }
 
     render() {
+        console.log('[App.js] render');
         let persons = null;
 
         if(this.state.showPersons){
@@ -56,17 +91,23 @@ class App extends Component {
         }
 
         return (
-            <div className={classes.App}>
-                <Cockpit 
-                    title={this.props.appTitle}
-                    showPersons={this.state.showPersons}
-                    persons={this.state.persons}
-                    clicked={this.togglePersonsHandler}/>
+            <Aux>
+                <button 
+                    onClick={() => { 
+                        this.setState({ showCockpit: false });
+                    }}>Remove Cockpit
+                </button>
+                {this.state.showCockpit ? <Cockpit 
+                        title={this.props.appTitle}
+                        showPersons={this.state.showPersons}
+                        personsLength={this.state.persons.length}
+                        clicked={this.togglePersonsHandler}
+                    /> : null }
                 {persons}
-            </div>
+            </Aux>
         );
         //return React.createElement('div', { className: 'App' }, React.createElement('h1', null, 'Hi, I\'m a React App'));
     }
 }
 
-export default App;
+export default withClass(App, classes.App);
